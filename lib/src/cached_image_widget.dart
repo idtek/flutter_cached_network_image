@@ -260,8 +260,8 @@ class CachedNetworkImageState extends State<CachedNetworkImage>
       stream: _cacheManager()
           .getFile(widget.imageUrl, headers: widget.httpHeaders)
           .where((f) =>
-              f?.originalUrl != _fileCache[widget.imageUrl]?.originalUrl ||
-              f?.validTill != _fileCache[widget.imageUrl]?.validTill),
+      f?.originalUrl != _fileCache[widget.imageUrl]?.originalUrl ||
+          f?.validTill != _fileCache[widget.imageUrl]?.validTill),
       builder: (BuildContext context, AsyncSnapshot<FileInfo> snapshot) {
         if (snapshot.hasError) {
           // error
@@ -274,7 +274,7 @@ class CachedNetworkImageState extends State<CachedNetworkImage>
           if (fileInfo == null) {
             // placeholder
             if (_imageHolders.length == 0 || _imageHolders.last.image != null) {
-              _addImage(image: null, duration: Duration(milliseconds: 500));
+              _addImage(image: null, duration: Duration(milliseconds: 0));
             }
           } else if (_imageHolders.length == 0 ||
               _imageHolders.last.image?.originalUrl != fileInfo.originalUrl ||
@@ -291,9 +291,9 @@ class CachedNetworkImageState extends State<CachedNetworkImage>
             children.add(_transitionWidget(
                 holder: holder, child: _errorWidget(context, holder.error)));
           } else if (holder.image == null) {
-            children.add(_placeholder(context));
+            children.add(_transitionWidget(
+                holder: holder, child: _placeholder(context)));
           } else {
-            children.clear();
             children.add(_transitionWidget(
                 holder: holder,
                 child: _image(
@@ -328,25 +328,25 @@ class CachedNetworkImageState extends State<CachedNetworkImage>
     return widget.imageBuilder != null
         ? widget.imageBuilder(context, imageProvider)
         : new Image(
-            image: imageProvider,
-            fit: widget.fit,
-            width: widget.width,
-            height: widget.height,
-            alignment: widget.alignment,
-            repeat: widget.repeat,
-            color: widget.color,
-            colorBlendMode: widget.colorBlendMode,
-            matchTextDirection: widget.matchTextDirection,
-          );
+      image: imageProvider,
+      fit: widget.fit,
+      width: widget.width,
+      height: widget.height,
+      alignment: widget.alignment,
+      repeat: widget.repeat,
+      color: widget.color,
+      colorBlendMode: widget.colorBlendMode,
+      matchTextDirection: widget.matchTextDirection,
+    );
   }
 
   _placeholder(BuildContext context) {
     return widget.placeholder != null
         ? widget.placeholder(context, widget.imageUrl)
         : new SizedBox(
-            width: widget.width,
-            height: widget.height,
-          );
+      width: widget.width,
+      height: widget.height,
+    );
   }
 
   _errorWidget(BuildContext context, Object error) {
