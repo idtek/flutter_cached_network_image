@@ -80,14 +80,63 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _testContent() {
-    return  new Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        _sizedContainer(
-          new Image(
-            image: new CachedNetworkImageProvider(
-                "http://via.placeholder.com/350x150"),
-          ),
+    return new SingleChildScrollView(
+      child: new Center(
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _sizedContainer(
+              new Image(
+                image: new CachedNetworkImageProvider(
+                    "http://via.placeholder.com/350x150"),
+              ),
+            ),
+            _sizedContainer(
+              new CachedNetworkImage(
+                placeholder: (context, url) => new CircularProgressIndicator(),
+                imageUrl: "http://via.placeholder.com/200x150",
+              ),
+            ),
+            _sizedContainer(
+              CachedNetworkImage(
+                imageUrl: "http://via.placeholder.com/300x150",
+                imageBuilder: (context, imageProvider) => Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                        colorFilter:
+                            ColorFilter.mode(Colors.red, BlendMode.colorBurn)),
+                  ),
+                ),
+                placeholder: (context, url) => CircularProgressIndicator(),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              ),
+            ),
+            _sizedContainer(
+              new CachedNetworkImage(
+                imageUrl: "http://notAvalid.uri",
+                placeholder: (context, url) => new CircularProgressIndicator(),
+                errorWidget: (context, url, error) => new Icon(Icons.error),
+              ),
+            ),
+            _sizedContainer(
+              new CachedNetworkImage(
+                imageUrl: "not a uri at all",
+                placeholder: (context, url) => new CircularProgressIndicator(),
+                errorWidget: (context, url, error) => new Icon(Icons.error),
+              ),
+            ),
+            _sizedContainer(
+              new CachedNetworkImage(
+                imageUrl: "http://via.placeholder.com/350x200",
+                placeholder: (context, url) => new CircularProgressIndicator(),
+                errorWidget: (context, url, error) => new Icon(Icons.error),
+                fadeOutDuration: new Duration(seconds: 1),
+                fadeInDuration: new Duration(seconds: 3),
+              ),
+            ),
+          ],
         ),
         _sizedContainer(
           new CachedNetworkImage(

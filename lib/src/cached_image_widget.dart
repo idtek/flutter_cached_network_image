@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
-Map<String, FileInfo> _fileCache = new Map<String, FileInfo>();
-
 typedef Widget ImageWidgetBuilder(
     BuildContext context, ImageProvider imageProvider);
 typedef Widget PlaceholderWidgetBuilder(BuildContext context, String url);
@@ -26,6 +24,9 @@ class CachedNetworkImage extends StatefulWidget {
 
   /// Widget displayed while the target [imageUrl] failed loading.
   final LoadingErrorWidgetBuilder errorWidget;
+
+  /// The duration of the fade-in animation for the [placeholder].
+  final Duration placeholderFadeInDuration;
 
   /// The duration of the fade-out animation for the [placeholder].
   final Duration fadeOutDuration;
@@ -131,9 +132,9 @@ class CachedNetworkImage extends StatefulWidget {
     this.imageBuilder,
     this.placeholder,
     this.errorWidget,
-    this.fadeOutDuration: const Duration(milliseconds: 300),
+    this.fadeOutDuration: const Duration(milliseconds: 1000),
     this.fadeOutCurve: Curves.easeOut,
-    this.fadeInDuration: const Duration(milliseconds: 700),
+    this.fadeInDuration: const Duration(milliseconds: 500),
     this.fadeInCurve: Curves.easeIn,
     this.width,
     this.height,
@@ -146,6 +147,7 @@ class CachedNetworkImage extends StatefulWidget {
     this.useOldImageOnUrlChange: false,
     this.color,
     this.colorBlendMode,
+    this.placeholderFadeInDuration,
   })  : assert(imageUrl != null),
         assert(fadeOutDuration != null),
         assert(fadeOutCurve != null),
@@ -236,6 +238,7 @@ class CachedNetworkImageState extends State<CachedNetworkImage>
         }
         lastHolder.animationController.reverse().then((_) {
           _imageHolders.remove(lastHolder);
+          if (mounted) setState(() {});
           return null;
         });
       });
@@ -253,15 +256,21 @@ class CachedNetworkImageState extends State<CachedNetworkImage>
     );
   }
 
+  FileInfo _getFromMemory(){
+    return _cacheManager().getFileFromMemory(widget.imageUrl);
+  }
+
   _animatedWidget() {
+    var fromMemory = _getFromMemory();
+
     return StreamBuilder<FileInfo>(
       key: _streamBuilderKey,
-      initialData: _fileCache[widget.imageUrl],
+      initialData: fromMemory,
       stream: _cacheManager()
           .getFile(widget.imageUrl, headers: widget.httpHeaders)
           .where((f) =>
-      f?.originalUrl != _fileCache[widget.imageUrl]?.originalUrl ||
-          f?.validTill != _fileCache[widget.imageUrl]?.validTill),
+              f?.originalUrl != fromMemory?.originalUrl ||
+              f?.validTill != fromMemory?.validTill),
       builder: (BuildContext context, AsyncSnapshot<FileInfo> snapshot) {
         if (snapshot.hasError) {
           // error
@@ -269,12 +278,13 @@ class CachedNetworkImageState extends State<CachedNetworkImage>
             _addImage(image: null, error: snapshot.error);
           }
         } else {
-          _fileCache[widget.imageUrl] = snapshot.data;
           var fileInfo = snapshot.data;
           if (fileInfo == null) {
             // placeholder
             if (_imageHolders.length == 0 || _imageHolders.last.image != null) {
-              _addImage(image: null, duration: Duration(milliseconds: 0));
+              _addImage(
+                  image: null,
+                  duration: widget.placeholderFadeInDuration ?? Duration.zero);
             }
           } else if (_imageHolders.length == 0 ||
               _imageHolders.last.image?.originalUrl != fileInfo.originalUrl ||
@@ -306,7 +316,7 @@ class CachedNetworkImageState extends State<CachedNetworkImage>
         return Stack(
           fit: StackFit.passthrough,
           alignment: widget.alignment,
-          children: children.reversed.toList(),
+          children: children.toList(),
         );
       },
     );

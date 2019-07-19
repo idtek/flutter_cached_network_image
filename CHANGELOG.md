@@ -1,3 +1,16 @@
+## [1.1.0] - 2019-07-13
+
+* Improved performance
+* Keep fetched files in sync with filemanager.
+* Better error handling.
+* Added extra example to show the imageBuilder
+
+## [1.0.0] - 2019-06-27
+* Updated dependencies
+
+## [0.8.0] - 2019-05-06
+* Fixed compile error on informationCollector by temporarily disabling it.
+
 ## [0.7.0] - 2019-03-06
 * BREAKING CHANGE: Renamed ErrorWidgetBuilder to LoadingErrorWidgetBuilder
 * LoadingErrorWidgetBuilder returns an Object instead of an Exception
